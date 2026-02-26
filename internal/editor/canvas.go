@@ -113,6 +113,43 @@ func (e *Editor) flatten(bakePixelate bool) *image.RGBA {
 	return out
 }
 
+func (e *Editor) renderPixelatePreview(start, end fyne.Position) {
+	preview := e.flatten(false)
+	x1, y1, x2, y2 := norm(int(start.X), int(start.Y), int(end.X), int(end.Y))
+	drawDashedRect(preview, x1, y1, x2, y2)
+	e.current = preview
+	e.view.Image = e.current
+	e.view.Refresh()
+}
+
+func drawDashedRect(img *image.RGBA, x1, y1, x2, y2 int) {
+	x1, y1, x2, y2 = norm(x1, y1, x2, y2)
+	if x2-x1 < 2 || y2-y1 < 2 {
+		return
+	}
+	dash := 6
+	for x := x1; x < x2; x++ {
+		on := ((x - x1) / dash % 2) == 0
+		if on {
+			setPixel(img, x, y1, color.White)
+			setPixel(img, x, y2-1, color.White)
+		} else {
+			setPixel(img, x, y1, color.Black)
+			setPixel(img, x, y2-1, color.Black)
+		}
+	}
+	for y := y1; y < y2; y++ {
+		on := ((y - y1) / dash % 2) == 0
+		if on {
+			setPixel(img, x1, y, color.White)
+			setPixel(img, x2-1, y, color.White)
+		} else {
+			setPixel(img, x1, y, color.Black)
+			setPixel(img, x2-1, y, color.Black)
+		}
+	}
+}
+
 type drawArea struct {
 	widget.BaseWidget
 	e *Editor
@@ -136,6 +173,9 @@ func (d *drawArea) Dragged(ev *fyne.DragEvent) {
 		d.e.dragStart = &p
 	}
 	d.e.dragLast = ev.Position
+	if d.e.state.Active == ToolPixelate {
+		d.e.renderPixelatePreview(*d.e.dragStart, d.e.dragLast)
+	}
 }
 
 func (d *drawArea) DragEnd() {
