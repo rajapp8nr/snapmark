@@ -11,12 +11,13 @@ import (
 )
 
 func NewToolbar(e *Editor) fyne.CanvasObject {
-	toolSelect := widget.NewSelect([]string{"Rectangle", "Ellipse", "Arrow", "Text"}, func(v string) {
+	toolSelect := widget.NewSelect([]string{"Rectangle", "Ellipse", "Arrow", "Text", "Pixelate"}, func(v string) {
 		switch v {
 		case "Rectangle": e.state.Active = ToolRectangle
 		case "Ellipse": e.state.Active = ToolEllipse
 		case "Arrow": e.state.Active = ToolArrow
 		case "Text": e.state.Active = ToolText
+		case "Pixelate": e.state.Active = ToolPixelate
 		}
 	})
 	toolSelect.SetSelected("Rectangle")

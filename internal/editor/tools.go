@@ -14,6 +14,7 @@ const (
 	ToolEllipse
 	ToolArrow
 	ToolText
+	ToolPixelate
 )
 
 type ToolState struct {
@@ -72,8 +73,31 @@ func (o TextOp) Apply(dst draw.Image) {
 	}
 }
 
+type PixelateOp struct { X1, Y1, X2, Y2 int }
+func (o PixelateOp) Apply(dst draw.Image) {}
+func (o PixelateOp) ApplyOverlay(dst draw.Image, src image.Image) {
+	x1, y1, x2, y2 := norm(o.X1, o.Y1, o.X2, o.Y2)
+	bounds := image.Rect(x1, y1, x2, y2).Intersect(dst.Bounds()).Intersect(src.Bounds())
+	if bounds.Empty() {
+		return
+	}
+	const block = 10
+	for y := bounds.Min.Y; y < bounds.Max.Y; y += block {
+		for x := bounds.Min.X; x < bounds.Max.X; x += block {
+			bx2 := min(x+block, bounds.Max.X)
+			by2 := min(y+block, bounds.Max.Y)
+			cx := x + (bx2-x)/2
+			cy := y + (by2-y)/2
+			c := src.At(cx, cy)
+			rect := image.Rect(x, y, bx2, by2)
+			draw.Draw(dst, rect, image.NewUniform(c), image.Point{}, draw.Src)
+		}
+	}
+}
+
 func norm(x1,y1,x2,y2 int)(int,int,int,int){ if x2<x1{x1,x2=x2,x1}; if y2<y1{y1,y2=y2,y1}; return x1,y1,x2,y2 }
 func max(a,b int) int { if a>b {return a}; return b }
+func min(a,b int) int { if a<b {return a}; return b }
 func setPixel(img draw.Image, x,y int, c color.Color){ if image.Pt(x,y).In(img.Bounds()) { img.Set(x,y,c) } }
 func drawLine(img draw.Image, x1,y1,x2,y2 int, c color.Color, stroke int){
 	dx := int(math.Abs(float64(x2-x1))); sx := -1; if x1<x2 { sx = 1 }

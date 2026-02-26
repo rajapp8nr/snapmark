@@ -73,16 +73,14 @@ func (e *Editor) addOp(op Operation) {
 }
 
 func (e *Editor) render() {
-	e.current = cloneToRGBA(e.base)
-	for _, op := range e.ops {
-		op.Apply(e.current)
-	}
+	e.current = e.flatten(false)
 	e.view.Image = e.current
 	e.view.Refresh()
 }
 
 func (e *Editor) save() {
-	actions.SaveDialog(e.win, e.current)
+	final := e.flatten(true)
+	actions.SaveDialog(e.win, final)
 }
 
 func (e *Editor) copyClipboard() {
@@ -91,6 +89,28 @@ func (e *Editor) copyClipboard() {
 		return
 	}
 	dialog.ShowInformation("Clipboard", "Copied image to clipboard", e.win)
+}
+
+func (e *Editor) flatten(bakePixelate bool) *image.RGBA {
+	out := cloneToRGBA(e.base)
+	for _, op := range e.ops {
+		if _, ok := op.(PixelateOp); ok {
+			continue
+		}
+		op.Apply(out)
+	}
+	for _, op := range e.ops {
+		pix, ok := op.(PixelateOp)
+		if !ok {
+			continue
+		}
+		if bakePixelate {
+			pix.ApplyOverlay(out, out)
+		} else {
+			pix.ApplyOverlay(out, e.base)
+		}
+	}
+	return out
 }
 
 type drawArea struct {
@@ -108,7 +128,7 @@ func (d *drawArea) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (d *drawArea) Dragged(ev *fyne.DragEvent) {
-	if d.e.state.Active != ToolRectangle && d.e.state.Active != ToolEllipse {
+	if d.e.state.Active != ToolRectangle && d.e.state.Active != ToolEllipse && d.e.state.Active != ToolPixelate {
 		return
 	}
 	if d.e.dragStart == nil {
@@ -129,6 +149,8 @@ func (d *drawArea) DragEnd() {
 		d.e.addOp(RectOp{X1: int(s.X), Y1: int(s.Y), X2: int(e.X), Y2: int(e.Y), Color: d.e.state.Color, Stroke: d.e.state.Stroke})
 	} else if d.e.state.Active == ToolEllipse {
 		d.e.addOp(EllipseOp{X1: int(s.X), Y1: int(s.Y), X2: int(e.X), Y2: int(e.Y), Color: d.e.state.Color, Stroke: d.e.state.Stroke})
+	} else if d.e.state.Active == ToolPixelate {
+		d.e.addOp(PixelateOp{X1: int(s.X), Y1: int(s.Y), X2: int(e.X), Y2: int(e.Y)})
 	}
 }
 

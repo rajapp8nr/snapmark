@@ -13,6 +13,7 @@ SnapMark is a cross-platform screenshot + annotation utility built with Go and F
   - Ellipse
   - Arrow
   - Text placement
+  - Pixelate (10x10 mosaic blocks, non-destructive overlay baked on save)
 - Configurable:
   - Colour picker
   - Stroke width
