@@ -38,10 +38,8 @@ func New(a fyne.App, src image.Image) *Editor {
 	content := container.NewBorder(nil, nil, NewToolbar(e), nil, drawArea)
 	e.win.SetContent(content)
 	e.win.Resize(fyne.NewSize(float32(e.current.Bounds().Dx())+180, float32(e.current.Bounds().Dy())+80))
-	e.win.Canvas().SetOnTypedShortcut(func(s fyne.Shortcut) {
-		if _, ok := s.(*fyne.ShortcutUndo); ok {
-			e.undo()
-		}
+	e.win.Canvas().AddShortcut(&fyne.ShortcutUndo{}, func(fyne.Shortcut) {
+		e.undo()
 	})
 	return e
 }
