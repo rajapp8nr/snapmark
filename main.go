@@ -28,19 +28,15 @@ func main() {
 
 	fullBtn := widget.NewButton("Full Screen", func() {
 		status.SetText("Capturing full screen in 2 seconds...")
-		go func() {
-			time.Sleep(2 * time.Second)
-			img, err := capture.FullScreen()
-			a.Driver().RunOnMain(func() {
-				if err != nil {
-					dialog.ShowError(err, w)
-					status.SetText("Capture failed")
-					return
-				}
-				status.SetText("Captured")
-				openEditor(img)
-			})
-		}()
+		time.Sleep(2 * time.Second)
+		img, err := capture.FullScreen()
+		if err != nil {
+			dialog.ShowError(err, w)
+			status.SetText("Capture failed")
+			return
+		}
+		status.SetText("Captured")
+		openEditor(img)
 	})
 
 	regionBtn := widget.NewButton("Select Region", func() {
