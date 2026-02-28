@@ -31,7 +31,7 @@ func main() {
 		go func() {
 			time.Sleep(2 * time.Second)
 			img, err := capture.FullScreen()
-			fyne.Do(func() {
+			a.Driver().RunOnMain(func() {
 				if err != nil {
 					dialog.ShowError(err, w)
 					status.SetText("Capture failed")
