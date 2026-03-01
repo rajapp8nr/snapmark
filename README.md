@@ -54,9 +54,12 @@ For clipboard copy support on Linux, install one of:
 - `xclip` (preferred)
 - `xsel` (fallback)
 
-For window list capture on Linux, install:
+Linux capture dependencies by session type:
 
-- `wmctrl`
+- X11 session: `wmctrl` (for Select Window)
+- Wayland session: `grim` (capture) and `slurp` (region select)
+
+On Wayland, Select Window is not generally supported due compositor restrictions; use Select Region.
 
 ## Project layout
 

@@ -13,6 +13,9 @@ import (
 )
 
 func ListWindows() ([]WindowInfo, error) {
+	if isWayland() {
+		return nil, fmt.Errorf("window capture list is not supported on Wayland; use Select Region")
+	}
 	cmd := exec.Command("bash", "-lc", "wmctrl -lG")
 	out, err := cmd.Output()
 	if err != nil {

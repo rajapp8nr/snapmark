@@ -56,9 +56,9 @@ func (r *regionSelector) CreateRenderer() fyne.WidgetRenderer {
 }
 
 type regionRenderer struct {
-	selector                *regionSelector
-	bg, selection, border   *canvas.Rectangle
-	objects                 []fyne.CanvasObject
+	selector              *regionSelector
+	bg, selection, border *canvas.Rectangle
+	objects               []fyne.CanvasObject
 }
 
 func (r *regionRenderer) Layout(sz fyne.Size) {
@@ -78,10 +78,10 @@ func (r *regionRenderer) Layout(sz fyne.Size) {
 	r.border.Move(p)
 	r.border.Resize(s)
 }
-func (r *regionRenderer) MinSize() fyne.Size { return fyne.NewSize(100, 100) }
-func (r *regionRenderer) Refresh()            { r.Layout(r.selector.Size()) }
+func (r *regionRenderer) MinSize() fyne.Size           { return fyne.NewSize(100, 100) }
+func (r *regionRenderer) Refresh()                     { r.Layout(r.selector.Size()) }
 func (r *regionRenderer) Objects() []fyne.CanvasObject { return r.objects }
-func (r *regionRenderer) Destroy() {}
+func (r *regionRenderer) Destroy()                     {}
 
 func normalizeRect(a, b fyne.Position) image.Rectangle {
 	x1, y1 := int(a.X), int(a.Y)
@@ -96,6 +96,10 @@ func normalizeRect(a, b fyne.Position) image.Rectangle {
 }
 
 func Region(app fyne.App) (image.Image, error) {
+	if isWayland() {
+		return regionWayland()
+	}
+
 	w := app.NewWindow("Select Region")
 	w.SetPadded(false)
 	w.SetFullScreen(true)
