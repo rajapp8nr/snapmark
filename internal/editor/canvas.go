@@ -217,7 +217,8 @@ func (d *drawArea) TappedSecondary(*fyne.PointEvent) {}
 
 func cloneToRGBA(src image.Image) *image.RGBA {
 	b := src.Bounds()
-	dst := image.NewRGBA(b)
-	draw.Draw(dst, b, src, b.Min, draw.Src)
+	normalized := image.Rect(0, 0, b.Dx(), b.Dy())
+	dst := image.NewRGBA(normalized)
+	draw.Draw(dst, normalized, src, b.Min, draw.Src)
 	return dst
 }
